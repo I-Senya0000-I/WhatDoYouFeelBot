@@ -94,6 +94,21 @@ class Database:
             (user_id,)
         )
         return self.cursor.fetchone()
+    
+    def get_user_by_id(self, id: int) -> Optional[sqlite3.Row]:
+        self.cursor.execute(
+            "SELECT * FROM users WHERE id = ?",
+            (id,)
+        )
+        return self.cursor.fetchone()
+        
+
+    def get_user_by_nickname(self, nickname: str) -> Optional[sqlite3.Row]:
+        self.cursor.execute(
+            "SELECT * FROM users WHERE nickname = ?",
+            (nickname,)
+        )
+        return self.cursor.fetchone()
 
     # =========================
     # CHATS
@@ -107,9 +122,9 @@ class Database:
         active: int = 1
     ) -> int:
         self.cursor.execute("""
-        INSERT INTO chats (user1_id, user2_id, anonymous, active)
-        VALUES (?, ?, ?, ?)
-        """, (user1_id, user2_id, anonymous, active))
+        INSERT INTO chats (user1_id, user2_id, anonymous, active, history)
+        VALUES (?, ?, ?, ?, ?)
+        """, (user1_id, user2_id, anonymous, active, "[]"))
         self.conn.commit()
         return self.cursor.lastrowid
 
@@ -119,19 +134,28 @@ class Database:
         user1_id: int,
         user2_id: int,
         anonymous: int,
-        active: int
+        active: int,
+        history: str
     ):
         self.cursor.execute("""
         UPDATE chats SET
             user1_id = ?,
             user2_id = ?,
             anonymous = ?,
-            active = ?
+            active = ?,
+            history = ?
         WHERE id = ?
-        """, (user1_id, user2_id, anonymous, active, chat_id))
+        """, (user1_id, user2_id, anonymous, active, history, chat_id))
         self.conn.commit()
 
     def get_chat(self, chat_id: int) -> Optional[sqlite3.Row]:
+        self.cursor.execute(
+            "SELECT * FROM chats WHERE id = ?",
+            (chat_id,)
+        )
+        return self.cursor.fetchone()
+    
+    def get_chat_by_id(self, chat_id: int) -> Optional[sqlite3.Row]:
         self.cursor.execute(
             "SELECT * FROM chats WHERE id = ?",
             (chat_id,)
