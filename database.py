@@ -20,7 +20,7 @@ class Database:
             user_id INTEGER UNIQUE,
             nickname TEXT,
             chat_id INTEGER,
-            gender TEXT,
+            stats TEXT,
             current_chat INTEGER,
             searching INTEGER DEFAULT 0
         )
@@ -59,13 +59,13 @@ class Database:
         user_id: int,
         nickname: str,
         chat_id: int,
-        gender: str
+        stats: str
     ):
         self.cursor.execute("""
         INSERT OR IGNORE INTO users
-        (user_id, nickname, chat_id, gender, current_chat, searching)
+        (user_id, nickname, chat_id, stats, current_chat, searching)
         VALUES (?, ?, ?, ?, NULL, 0)
-        """, (user_id, nickname, chat_id, gender))
+        """, (user_id, nickname, chat_id, stats))
         self.conn.commit()
 
     def update_user(
@@ -73,7 +73,7 @@ class Database:
         user_id: int,
         nickname: str,
         chat_id: int,
-        gender: str,
+        stats: str,
         current_chat: Optional[int],
         searching: int
     ):
@@ -81,11 +81,11 @@ class Database:
         UPDATE users SET
             nickname = ?,
             chat_id = ?,
-            gender = ?,
+            stats = ?,
             current_chat = ?,
             searching = ?
         WHERE user_id = ?
-        """, (nickname, chat_id, gender, current_chat, searching, user_id))
+        """, (nickname, chat_id, stats, current_chat, searching, user_id))
         self.conn.commit()
 
     def get_user(self, user_id: int) -> Optional[sqlite3.Row]:

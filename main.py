@@ -3,8 +3,16 @@ import database
 import json
 
 
+default_stats = json.dumps({
+        "plan": "free",
+        "activation_rate": {
+            "test_persona": {
+                "chance": 1.0,
+            }
+        }
 
-     
+    })
+
 
 
 def get_token(filename):
@@ -28,7 +36,7 @@ def menu(message):
     if db_user:
         print("User in db")
     else:
-        db.create_user(user.id, user.username, message.chat.id, "")
+        db.create_user(user.id, user.username, message.chat.id, default_stats)
         db_user = db.get_user(user.id)
         print("created")
     kb = types.InlineKeyboardMarkup()
@@ -55,6 +63,24 @@ def menu_edit(message, prev_bot_msg):
     #bot.send_message(message.chat.id, "Это очень крутой бот с мощными кнопками и промптами! вот кнопки а промптов нет", reply_markup=kb)
     bot.edit_message_text("Ботяра", message.chat.id, prev_bot_msg.id, reply_markup=kb)
 
+
+@bot.callback_query_handler(func=lambda call: call.data == "stats")
+def show_stats(call):
+    user = db.get_user(call.from_user.id)
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton("Back", callback_data="menu"))
+    kb.add(types.InlineKeyboardButton("Upgrade plan", callback_data="plan"))
+    kb.add(types.InlineKeyboardButton("Edit rates", callback_data="edit_plan"))
+    user_stats = json.loads(user["stats"])
+    message_text = f"""
+    User: {user["nickname"]}
+    Plan: {user_stats["plan"]}
+    Activation rates:
+    """
+    for key in user_stats["activation_rate"]:
+        message_text += f"\n{key}: {user_stats["activation_rate"][key]["chance"]}"
+    
+    bot.edit_message_text(message_text, call.message.chat.id, call.message.id, reply_markup=kb)
 
 
 """
@@ -193,6 +219,9 @@ def default_message_handler(message):
         # if chat is active send message
         bot.send_message(user2["chat_id"], message.text)
         
+
+
+
 
 
 
