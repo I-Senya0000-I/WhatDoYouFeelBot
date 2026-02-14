@@ -1,7 +1,7 @@
 from telebot import types, TeleBot
 import database
 import json
-
+import persona_module
 
 default_stats = json.dumps({
         "plan": "free",
@@ -218,6 +218,9 @@ def default_message_handler(message):
     if user2["current_chat"] == user["current_chat"]:
         # if chat is active send message
         bot.send_message(user2["chat_id"], message.text)
+        reaction = persona_module.get_reaction(user2, chat)
+        if reaction:
+            bot.send_message(user2["chat_id"], reaction)
         
 
 
